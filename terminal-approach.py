@@ -22,7 +22,7 @@ def createBoard(rows, columns):
 def showBoard(board):
     for i in range(len(board)):
         if i > 0:
-            print(flush=True)
+            print()
         for j in board[i]:
             print(j, end='', flush=True)
 
