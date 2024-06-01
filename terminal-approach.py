@@ -22,7 +22,7 @@ def createBoard(rows, columns):
 def showBoard(board):
     for i in range(len(board)):
         if i > 0:
-            print()
+            print(flush=True)
         for j in board[i]:
             print(j, end='', flush=True)
 
@@ -73,6 +73,15 @@ coord = createPlayer(board)
 while running:
     showBoard(board)
     direction = msvcrt.getwch()
-    coord = movePlayer(board, direction, coord)
     clearScreen()
+    running2=True
+    while running2:
+        showBoard(board)
+        if msvcrt.kbhit():
+            direction = msvcrt.getwch()
+        lastDirection = direction
+        coord = movePlayer(board, direction, coord)
+        time.sleep(0.4)
+        clearScreen()
+    
     
