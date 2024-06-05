@@ -2,6 +2,7 @@ import time
 import os
 import msvcrt
 import sys
+import random
 
 
 def clearScreen():
@@ -63,12 +64,28 @@ def movePlayer(board, input, coordinates):
     if input == 'q':
         sys.exit(0)
 
-rows = 11
-columns = 21
+    return [row,column]
+
+def createBody(board, input, coordinates):
+    a=0
+
+def moveBody(board, input, coordinates):
+    a=0
+
+def createSugar(board, boardRows, boardColumns):
+    row=random.randint(1, boardRows)
+    column=random.randint(1, boardColumns)
+    board[row][column]=6
+    return [row,column]
+
+
+boardRows = 11
+boardColumns = 21
 running = True
 
-board = createBoard(rows, columns)
+board = createBoard(boardRows, boardColumns)
 coord = createPlayer(board)
+sugarCoord = createSugar(board, boardRows, boardColumns)
 
 while running:
     showBoard(board)
@@ -77,11 +94,11 @@ while running:
     running2=True
     while running2:
         showBoard(board)
+        if board[sugarCoord[0]][sugarCoord[1]] == 0:
+            sugarCoord = createSugar(board, boardRows, boardColumns)
         if msvcrt.kbhit():
             direction = msvcrt.getwch()
         lastDirection = direction
         coord = movePlayer(board, direction, coord)
         time.sleep(0.4)
         clearScreen()
-    
-    
