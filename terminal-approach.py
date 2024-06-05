@@ -9,6 +9,11 @@ def clearScreen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def killProcess(input):
+    if input == 'q':
+        sys.exit(0)
+
+
 def createBoard(rows, columns):
     matriz = []
 
@@ -20,6 +25,7 @@ def createBoard(rows, columns):
     clearScreen()
     return matriz
 
+
 def showBoard(board):
     for i in range(len(board)):
         if i > 0:
@@ -27,13 +33,26 @@ def showBoard(board):
         for j in board[i]:
             print(j, end='', flush=True)
 
-def createPlayer(board):
-    row = int(len(board)/2)
-    column = int(len(board[0])/2)
+
+
+def createBody(board, coordinates):
+    row = coordinates[0]
+    column = coordinates[1]
+
     board[row][column]=1
+
+    return [row, column]
+
+
+def createSugar(board, boardRows, boardColumns):
+    row=random.randint(0, boardRows-1)
+    column=random.randint(0, boardColumns-1)
+    board[row][column]='*'
     return [row,column]
 
-def movePlayer(board, input, coordinates):
+
+
+def moveHead(board, input, coordinates):
     row = coordinates[0]
     column = coordinates[1]
 
@@ -61,31 +80,36 @@ def movePlayer(board, input, coordinates):
         board[row][column]=1
         return [row,column]
 
-    if input == 'q':
-        sys.exit(0)
-
     return [row,column]
 
-def createBody(board, input, coordinates):
-    a=0
 
-def moveBody(board, input, coordinates):
-    a=0
+def followHead(board, input, coordinates):
+    row = coordinates[0]
+    column = coordinates[1]
 
-def createSugar(board, boardRows, boardColumns):
-    row=random.randint(1, boardRows)
-    column=random.randint(1, boardColumns)
-    board[row][column]=6
-    return [row,column]
+    board[row][column] = 1
+
+    if input == 'w':
+        board[row+1][column] = 0
+    if input == 'a':
+        board[row][column+1] = 0
+    if input == 's':
+        board[row-1][column] = 0
+    if input == 'd':
+        board[row][column-1] = 0
 
 
 boardRows = 11
 boardColumns = 21
 running = True
 
+row = int(boardRows/2)
+column = int(boardColumns/2)
+
 board = createBoard(boardRows, boardColumns)
-coord = createPlayer(board)
+coord = createBody(board, [row, column])
 sugarCoord = createSugar(board, boardRows, boardColumns)
+bodyCoord = None
 
 while running:
     showBoard(board)
@@ -94,11 +118,15 @@ while running:
     running2=True
     while running2:
         showBoard(board)
-        if board[sugarCoord[0]][sugarCoord[1]] == 0:
-            sugarCoord = createSugar(board, boardRows, boardColumns)
         if msvcrt.kbhit():
             direction = msvcrt.getwch()
-        lastDirection = direction
-        coord = movePlayer(board, direction, coord)
+        coord = moveHead(board, direction, coord)
+        if board[sugarCoord[0]][sugarCoord[1]] == 0:
+            bodyCoord = createBody(board, sugarCoord)
+            sugarCoord = createSugar(board, boardRows, boardColumns)
+        if bodyCoord != None:
+            followHead(board, direction, bodyCoord)
+            bodyCoord = coord
         time.sleep(0.4)
+        killProcess(direction) 
         clearScreen()
