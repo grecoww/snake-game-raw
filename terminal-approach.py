@@ -1,7 +1,6 @@
 import time
 import os
 import msvcrt
-import sys
 import random
 
 
@@ -11,7 +10,7 @@ def clearScreen():
 
 def killProcess(input):
     if input == 'q':
-        sys.exit(0)
+        exit()
 
 
 def createBoard(rows, columns):
@@ -25,79 +24,120 @@ def createBoard(rows, columns):
     clearScreen()
     return matriz
 
-
+#devem ter maneiras mais eficientes de renderizar o board (talvez usar buffers)
 def showBoard(board):
     for i in range(len(board)):
         if i > 0:
             print()
         for j in board[i]:
             print(j, end='', flush=True)
+            
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            board[i][j] = 0
+
+
+def createBody(board, coordinateArray, bodyCoord, initialize):
+    coordinateArray.append([bodyCoord[0], bodyCoord[1]])
+    if initialize:
+        row = bodyCoord[0]
+        column = bodyCoord[1]
+        board[row][column]=1
+    return coordinateArray
 
 
 
-def createBody(board, coordinates):
-    row = coordinates[0]
-    column = coordinates[1]
+def createSugar(board):
+    boardRows = len(board)
+    boardColumns = len(board[0])
 
-    board[row][column]=1
-
-    return [row, column]
-
-
-def createSugar(board, boardRows, boardColumns):
     row=random.randint(0, boardRows-1)
     column=random.randint(0, boardColumns-1)
     board[row][column]='*'
     return [row,column]
 
 
+def moveBody(input, coordinatesArray):
+    def moveHead(input, coordinatesArray):
+        row = coordinatesArray[0][0]
+        column = coordinatesArray[0][1]
 
-def moveHead(board, input, coordinates):
-    row = coordinates[0]
-    column = coordinates[1]
+        if input == 'w':
+            row-=1
+        
+        if input == 'a':
+            column-=1
+        
+        if input == 's':
+            row+=1
+        
+        if input == 'd':
+            column+=1
 
-    if input == 'w':
-        board[row][column]=0
-        row-=1
-        board[row][column]=1
-        return [row,column]
+        coordinatesArray[0] = [row, column]
+        return coordinatesArray
     
-    if input == 'a':
-        board[row][column]=0
-        column-=1
-        board[row][column]=1
-        return [row,column]
+    def moveTail(coordinatesArray):
+        if len(coordinatesArray) > 1:
+            for index in range(len(coordinatesArray)-1, 0, -1):
+                coordinatesArray[index] = coordinatesArray[index-1]
+            return coordinatesArray
+        else:
+            return coordinatesArray
+        
+    coordinatesArray = moveTail(coordinatesArray)
+    coordinatesArray = moveHead(input, coordinatesArray)
+
+    return coordinatesArray
+        
+            
+def getTailCoord(coordinatesArray, input):
+    if len(coordinatesArray) == 1:
+        row = coordinatesArray[0][0]
+        column = coordinatesArray[0][1]
+
+        if input == 'w':
+            row-=1
+            return [row,column]
     
-    if input == 's':
-        board[row][column]=0
-        row+=1
-        board[row][column]=1
-        return [row,column]
+        if input == 'a':
+            column-=1
+            return [row,column]
     
-    if input == 'd':
-        board[row][column]=0
-        column+=1
-        board[row][column]=1
-        return [row,column]
+        if input == 's':
+            row+=1
+            return [row,column]
+    
+        if input == 'd':
+            column+=1
+            return [row,column]
 
-    return [row,column]
+    else:
+        tailCoord = coordinatesArray[-1]
+        subTailCoord = coordinatesArray[-2]
+
+        sumCoord = [subTailCoord[0]-tailCoord[0], subTailCoord[1]-tailCoord[1]]
+
+        if sumCoord[0] == -1:
+            return [tailCoord[0]-1, tailCoord[1]]
+        
+        if sumCoord[0] == 1:
+            return [tailCoord[0]+1, tailCoord[1]]
+        
+        if sumCoord[1] == -1:
+            return [tailCoord[0], tailCoord[1]+1]
+        
+        if sumCoord[1] == 1:
+            print([tailCoord[0], tailCoord[1]-1])
+            return [tailCoord[0], tailCoord[1]-1]
 
 
-def followHead(board, input, coordinates):
-    row = coordinates[0]
-    column = coordinates[1]
+def placeSugar(board, sugarCoord):
+    board[sugarCoord[0]][sugarCoord[1]]='*'
 
-    board[row][column] = 1
-
-    if input == 'w':
-        board[row+1][column] = 0
-    if input == 'a':
-        board[row][column+1] = 0
-    if input == 's':
-        board[row-1][column] = 0
-    if input == 'd':
-        board[row][column-1] = 0
-
+def placePlayer(board, coordinatesArray):
+    for coordinate in coordinatesArray:
+        board[coordinate[0]][coordinate[1]]=1
 
 boardRows = 11
 boardColumns = 21
@@ -107,9 +147,8 @@ row = int(boardRows/2)
 column = int(boardColumns/2)
 
 board = createBoard(boardRows, boardColumns)
-coord = createBody(board, [row, column])
-sugarCoord = createSugar(board, boardRows, boardColumns)
-bodyCoord = None
+coordinateArray = createBody(board, [], [row, column], initialize=True)
+sugarCoord = createSugar(board)
 
 while running:
     showBoard(board)
@@ -117,16 +156,16 @@ while running:
     clearScreen()
     running2=True
     while running2:
-        showBoard(board)
+        print(coordinateArray)
         if msvcrt.kbhit():
             direction = msvcrt.getwch()
-        coord = moveHead(board, direction, coord)
-        if board[sugarCoord[0]][sugarCoord[1]] == 0:
-            bodyCoord = createBody(board, sugarCoord)
-            sugarCoord = createSugar(board, boardRows, boardColumns)
-        if bodyCoord != None:
-            followHead(board, direction, bodyCoord)
-            bodyCoord = coord
-        time.sleep(0.4)
+        coordinateArray = moveBody(direction, coordinateArray)
+        placePlayer(board, coordinateArray)
+        if board[sugarCoord[0]][sugarCoord[1]] == 1:
+            sugarCoord = createSugar(board)
+            coordinateArray = createBody(board, coordinateArray, bodyCoord=getTailCoord(coordinateArray, direction), initialize=False)
+        placeSugar(board, sugarCoord)
+        showBoard(board)
+        time.sleep(0.3)
         killProcess(direction) 
         clearScreen()
