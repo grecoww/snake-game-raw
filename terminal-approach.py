@@ -51,8 +51,8 @@ def createSugar(board):
     boardRows = len(board)
     boardColumns = len(board[0])
 
-    row=random.randint(0, boardRows-1)
-    column=random.randint(0, boardColumns-1)
+    row=random.randint(1, boardRows-2)
+    column=random.randint(1, boardColumns-2)
     board[row][column]='*'
     return [row,column]
 
@@ -62,20 +62,26 @@ def moveBody(input, coordinatesArray):
         row = coordinatesArray[0][0]
         column = coordinatesArray[0][1]
 
-        if input == 'w':
-            row-=1
-        
-        if input == 'a':
-            column-=1
-        
-        if input == 's':
-            row+=1
-        
-        if input == 'd':
-            column+=1
+        if not (row < 0 or column < 0 or row > boardRows-1 or column > boardColumns-1):
 
-        coordinatesArray[0] = [row, column]
-        return coordinatesArray
+            if input == 'w':
+                row-=1
+            
+            if input == 'a':
+                column-=1
+            
+            if input == 's':
+                row+=1
+            
+            if input == 'd':
+                column+=1
+
+            coordinatesArray[0] = [row, column]
+            return coordinatesArray
+        
+        else: 
+
+            killProcess('q')
     
     def moveTail(coordinatesArray):
         if len(coordinatesArray) > 1:
@@ -95,7 +101,7 @@ def getTailCoord(coordinatesArray, input):
     if len(coordinatesArray) == 1:
         row = coordinatesArray[0][0]
         column = coordinatesArray[0][1]
-
+    
         if input == 'w':
             row-=1
             return [row,column]
@@ -128,7 +134,6 @@ def getTailCoord(coordinatesArray, input):
             return [tailCoord[0], tailCoord[1]+1]
         
         if sumCoord[1] == 1:
-            print([tailCoord[0], tailCoord[1]-1])
             return [tailCoord[0], tailCoord[1]-1]
 
 
