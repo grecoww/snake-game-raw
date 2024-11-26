@@ -144,6 +144,11 @@ def placePlayer(board, coordinatesArray):
     for coordinate in coordinatesArray:
         board[coordinate[0]][coordinate[1]]=1
 
+def verifyCollision(coordinateArray):
+    coordinateSet = set(tuple (coord) for coord in coordinateArray)
+    if not len(coordinateSet) == len(coordinateArray):
+        killProcess('q')
+
 boardRows = 11
 boardColumns = 21
 running = True
@@ -158,6 +163,7 @@ sugarCoord = createSugar(board)
 while running:
     showBoard(board)
     direction = msvcrt.getwch()
+    coordinateArray = createBody(board, coordinateArray, bodyCoord=getTailCoord(coordinateArray, direction), initialize=False)
     clearScreen()
     running2=True
     while running2:
@@ -166,6 +172,7 @@ while running:
             direction = msvcrt.getwch()
         coordinateArray = moveBody(direction, coordinateArray)
         placePlayer(board, coordinateArray)
+        verifyCollision(coordinateArray)
         if board[sugarCoord[0]][sugarCoord[1]] == 1:
             sugarCoord = createSugar(board)
             coordinateArray = createBody(board, coordinateArray, bodyCoord=getTailCoord(coordinateArray, direction), initialize=False)
