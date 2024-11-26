@@ -51,11 +51,25 @@ def createSugar(board):
     boardRows = len(board)
     boardColumns = len(board[0])
 
-    row=random.randint(1, boardRows-2)
-    column=random.randint(1, boardColumns-2)
+    row=random.randint(0, boardRows-1)
+    column=random.randint(0, boardColumns-1)
     board[row][column]='*'
     return [row,column]
 
+def incrementMovement(input, row, column):
+    if input == 'w':
+        row-=1
+            
+    if input == 'a':
+        column-=1
+            
+    if input == 's':
+        row+=1
+            
+    if input == 'd':
+        column+=1
+    
+    return [row, column]
 
 def moveBody(input, coordinatesArray):
     def moveHead(input, coordinatesArray):
@@ -64,19 +78,9 @@ def moveBody(input, coordinatesArray):
 
         if not (row < 0 or column < 0 or row > boardRows-1 or column > boardColumns-1):
 
-            if input == 'w':
-                row-=1
-            
-            if input == 'a':
-                column-=1
-            
-            if input == 's':
-                row+=1
-            
-            if input == 'd':
-                column+=1
+            coord = incrementMovement(input, row, column)
 
-            coordinatesArray[0] = [row, column]
+            coordinatesArray[0] = coord
             return coordinatesArray
         
         else: 
@@ -102,23 +106,12 @@ def getTailCoord(coordinatesArray, input):
         row = coordinatesArray[0][0]
         column = coordinatesArray[0][1]
     
-        if input == 'w':
-            row-=1
-            return [row,column]
-    
-        if input == 'a':
-            column-=1
-            return [row,column]
-    
-        if input == 's':
-            row+=1
-            return [row,column]
-    
-        if input == 'd':
-            column+=1
-            return [row,column]
+        coord = incrementMovement(input, row, column)
 
+        return coord
+    
     else:
+
         tailCoord = coordinatesArray[-1]
         subTailCoord = coordinatesArray[-2]
 
@@ -149,8 +142,8 @@ def verifyCollision(coordinateArray):
     if not len(coordinateSet) == len(coordinateArray):
         killProcess('q')
 
-boardRows = 11
-boardColumns = 21
+boardRows = 8
+boardColumns = 12
 running = True
 
 row = int(boardRows/2)
